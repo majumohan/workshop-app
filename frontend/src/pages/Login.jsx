@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { LogIn, Mail, Lock, ShieldCheck, Briefcase } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Admin');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,24 +18,25 @@ const Login = () => {
     setTimeout(() => {
       try {
         const users = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
+        const normalizedEmail = email.trim().toLowerCase();
+        const user = users.find(u => (u.email.toLowerCase() === normalizedEmail || u.email === email) && u.password === password && u.role === role);
 
         if (user) {
           if (user.status === 'pending') {
-            setError('Your account is pending owner approval. Please wait to be admitted.');
+            setError('Your account is pending Super Admin approval. Please wait to be admitted.');
             setIsLoading(false);
             return;
           }
 
           localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, role: user.role }));
           // Redirect to appropriate dashboard based on role
-          if (user.role === 'Admin') {
-            navigate('/repairs'); // Admins go to repairs by default
+          if (user.role === 'Admin' || user.role === 'User') {
+            navigate('/repairs'); 
           } else {
-            navigate('/'); // Owners go to main dashboard
+            navigate('/'); // Super Admins go to main dashboard
           }
         } else {
-          setError('Invalid email or password. Please try again.');
+          setError('Invalid email, password, or role. Please try again.');
         }
       } catch (err) {
         setError('System error. Please try again.');
@@ -57,7 +59,7 @@ const Login = () => {
             <ShieldCheck size={32} color="var(--accent-primary)" />
           </div>
           <h1 className="text-gradient" style={{ fontSize: '2rem', margin: '0 0 0.5rem 0' }}>Welcome Back</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Sign in to GearShift Workshop</p>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Sign in to GADGETS PITSTOP</p>
         </div>
 
         {error && (
@@ -74,12 +76,28 @@ const Login = () => {
               <input 
                 type="email" 
                 className="form-input" 
-                placeholder="admin@gearshift.com" 
+                placeholder="admin@gadgetspitstop.com" 
                 style={{ paddingLeft: '2.8rem', background: 'rgba(255,255,255,0.03)' }}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" style={{ color: 'var(--text-secondary)' }}>Login As</label>
+            <div style={{ position: 'relative' }}>
+              <Briefcase size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+              <select 
+                className="form-input" 
+                style={{ paddingLeft: '2.8rem', background: 'rgba(255,255,255,0.03)', appearance: 'none' }}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="Admin" style={{ background: 'var(--bg-secondary)' }}>Admin</option>
+                <option value="User" style={{ background: 'var(--bg-secondary)' }}>User</option>
+              </select>
             </div>
           </div>
 
@@ -105,7 +123,17 @@ const Login = () => {
         </form>
 
         <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          Don't have an account? <Link to="/signup" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: '600' }}>Register here</Link>
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <Link to="/signup" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: '500' }}>
+              Don't have an account? Register here
+            </Link>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.5, fontSize: '0.8rem' }}>
+            <Link to="/superadmin" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>
+              Developer Access
+            </Link>
+          </div>
         </div>
       </div>
     </div>

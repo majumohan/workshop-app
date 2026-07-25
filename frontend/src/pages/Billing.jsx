@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, IndianRupee, Download, FileText, Printer, CheckCircle, X } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
 
 const Billing = () => {
   const [bills, setBills] = useState([]);
@@ -62,6 +63,18 @@ const Billing = () => {
     } catch(e) {
       console.error(e);
     }
+  };
+
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('printable-invoice');
+    const opt = {
+      margin:       [0.5, 0.5, 0.5, 0.5],
+      filename:     `${selectedInvoice.invoiceNumber ? selectedInvoice.invoiceNumber.replace(/\\//g, '-') : 'INV-' + selectedInvoice._id.slice(-6)}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
   };
 
   const filteredBills = bills.filter(b => {
@@ -130,7 +143,7 @@ const Billing = () => {
                     <td>
                       <div style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'monospace', color: 'var(--accent-primary)' }}>
                         <FileText size={16} />
-                        INV-{bill._id.slice(-6)}
+                        {bill.invoiceNumber || `INV-${bill._id.slice(-6)}`}
                       </div>
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{bill.dateLogged}</div>
                     </td>
@@ -180,6 +193,9 @@ const Billing = () => {
                 <button className="btn btn-secondary" onClick={() => window.print()} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
                   <Printer size={14} /> Print
                 </button>
+                <button className="btn btn-primary" onClick={handleDownloadPDF} style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
+                  <Download size={14} /> PDF
+                </button>
                 <button className="close-btn" onClick={() => setSelectedInvoice(null)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                   <X size={20} />
                 </button>
@@ -191,13 +207,14 @@ const Billing = () => {
               
               <div className="flex-between" style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                 <div>
-                  <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0', color: '#1a1a1a' }}>GearShift Workshop</h1>
-                  <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>123 Motorcycle Lane, Auto District</p>
+                  <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0', color: '#1a1a1a' }}>GADGETS PITSTOP</h1>
+                  <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Bharata Mata College, NEAR, Thrikkakara</p>
+                  <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Kakkanad, Kerala 682021</p>
                   <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Phone: (555) 123-4567</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <h2 style={{ fontSize: '1.8rem', color: '#6366f1', margin: '0 0 0.5rem 0', letterSpacing: '1px', textTransform: 'uppercase' }}>Invoice</h2>
-                  <p style={{ margin: '0', color: '#4b5563', fontWeight: '500' }}>#INV-{selectedInvoice._id.slice(-6)}</p>
+                  <p style={{ margin: '0', color: '#4b5563', fontWeight: '500' }}>#{selectedInvoice.invoiceNumber || `INV-${selectedInvoice._id.slice(-6)}`}</p>
                   <p style={{ margin: '0', color: '#4b5563' }}>Date: {selectedInvoice.dateLogged}</p>
                 </div>
               </div>

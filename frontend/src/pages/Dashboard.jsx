@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Wrench, ClipboardCheck, TrendingUp, Bike, Calendar as CalendarIcon, FilterX } from 'lucide-react';
+import { Users, Wrench, ClipboardCheck, TrendingUp, Bike, Calendar as CalendarIcon, LogOut, PlusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [allJobs, setAllJobs] = useState([]);
   const [filterMode, setFilterMode] = useState('all');
   const [filterDate, setFilterDate] = useState('');
@@ -20,6 +22,17 @@ const Dashboard = () => {
       setLoading(false);
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    navigate('/login');
+  };
+
+  let currentUser = { name: 'Super Admin', role: 'Super Admin' };
+  try {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) currentUser = JSON.parse(userStr);
+  } catch (e) {}
 
   // Derived state based on filter
   const filteredJobs = allJobs.filter(job => {
@@ -98,11 +111,31 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in">
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <button 
+          onClick={handleLogout}
+          className="btn btn-danger"
+          style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px' }}
+        >
+          <LogOut size={16} /> Logout
+        </button>
+      </div>
+
+      <div className="mobile-stack" style={{ marginBottom: '2rem', flexWrap: 'wrap' }}>
         <div>
-          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome Back, Admin</h1>
+          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome Back, {currentUser.name}</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Here's what's happening in your workshop.</p>
         </div>
+        
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button 
+            onClick={() => navigate('/register')}
+            className="btn btn-primary"
+            style={{ padding: '0.6rem 1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)' }}
+          >
+            <PlusCircle size={18} />
+            New Intake
+          </button>
         
         <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0 0.5rem' }}>
@@ -148,6 +181,7 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         <StatCard 
@@ -172,7 +206,7 @@ const Dashboard = () => {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
+      <div className="dashboard-grid">
         <div className="card glass-panel">
           <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Wrench size={20} color="var(--accent-primary)" />

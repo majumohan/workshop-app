@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut, Shield, Menu, X } from 'lucide-react';
 
 import Dashboard from './pages/Dashboard';
 import Registration from './pages/Registration';
@@ -10,14 +10,15 @@ import Customers from './pages/Customers';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Staff from './pages/Staff';
+import DeveloperAuth from './pages/DeveloperAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
   // Hide sidebar on auth pages
-  if (location.pathname === '/login' || location.pathname === '/signup') return null;
+  if (location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/superadmin') return null;
 
   const userStr = localStorage.getItem('currentUser');
   let user = null;
@@ -28,12 +29,12 @@ const Sidebar = () => {
   if (!user) return null;
 
   const allNavItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Owner'] },
-    { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Owner'] },
-    { name: 'New Intake', path: '/register', icon: <UserPlus size={20} />, roles: ['Owner', 'Admin'] },
-    { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Owner', 'Admin'] },
-    { name: 'Repairs', path: '/repairs', icon: <Wrench size={20} />, roles: ['Owner', 'Admin'] },
-    { name: 'Billing', path: '/billing', icon: <Receipt size={20} />, roles: ['Owner'] },
+    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Super Admin'] },
+    { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Super Admin'] },
+    { name: 'New Intake', path: '/register', icon: <UserPlus size={20} />, roles: ['Super Admin', 'Admin'] },
+    { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
+    { name: 'Repairs', path: '/repairs', icon: <Wrench size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
+    { name: 'Billing', path: '/billing', icon: <Receipt size={20} />, roles: ['Super Admin'] },
   ];
 
   const navItems = allNavItems.filter(item => item.roles.includes(user.role));
@@ -44,25 +45,24 @@ const Sidebar = () => {
   };
 
   return (
-    <aside style={{
-      width: '250px',
-      height: '100vh',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-      backgroundColor: 'var(--bg-secondary)',
-      borderRight: '1px solid var(--border-color)',
-      padding: '2rem 1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: 100
-    }}>
-      <div style={{ marginBottom: '2rem', padding: '0 1rem' }}>
-        <h2 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
-          GearShift
-        </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Workshop Management</p>
-      </div>
+    <>
+      <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={() => setIsOpen(false)}></div>
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', padding: '0 1rem' }}>
+          <div>
+            <h2 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+              GADGETS PITSTOP
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>Workshop Management</p>
+          </div>
+          <button 
+            className="close-btn d-md-none" 
+            style={{ display: window.innerWidth > 768 ? 'none' : 'block' }}
+            onClick={() => setIsOpen(false)}
+          >
+            <X size={24} />
+          </button>
+        </div>
       
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
         {navItems.map((item) => {
@@ -71,6 +71,7 @@ const Sidebar = () => {
             <Link 
               key={item.name} 
               to={item.path}
+              onClick={() => setIsOpen(false)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -119,21 +120,54 @@ const Sidebar = () => {
           onMouseOver={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
           onMouseOut={e => e.currentTarget.style.background = 'transparent'}
         >
-          <LogOut size={18} /> Logout
+          <LogOut size={18} /> {user.role} Logout
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 
 // Layout wrapper to handle styles cleanly
 const AppLayout = ({ children }) => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/superadmin';
   
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    navigate('/login');
+  };
+
+  let user = null;
+  if (!isAuthPage) {
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      if (userStr) user = JSON.parse(userStr);
+    } catch(e) {}
+  }
+
   return (
     <div className={isAuthPage ? '' : 'app-layout'}>
-      <Sidebar />
+      {!isAuthPage && user && (
+        <div className="mobile-header">
+          <h2 className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>GADGETS PITSTOP</h2>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginRight: '0.5rem' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{user.name}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', textTransform: 'uppercase' }}>{user.role}</span>
+            </div>
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }} title="Logout">
+              <LogOut size={24} />
+            </button>
+            <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex' }}>
+              <Menu size={28} />
+            </button>
+          </div>
+        </div>
+      )}
+      <Sidebar isOpen={isMobileMenuOpen} setIsOpen={setIsMobileMenuOpen} />
       <main className={isAuthPage ? '' : 'main-content'}>
         {children}
       </main>
@@ -149,16 +183,17 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/superadmin" element={<DeveloperAuth />} />
 
-          {/* Protected Owner Routes */}
-          <Route path="/" element={<ProtectedRoute allowedRoles={['Owner']}><Dashboard /></ProtectedRoute>} />
-          <Route path="/billing" element={<ProtectedRoute allowedRoles={['Owner']}><Billing /></ProtectedRoute>} />
-          <Route path="/staff" element={<ProtectedRoute allowedRoles={['Owner']}><Staff /></ProtectedRoute>} />
+          {/* Protected Super Admin Routes */}
+          <Route path="/" element={<ProtectedRoute allowedRoles={['Super Admin']}><Dashboard /></ProtectedRoute>} />
+          <Route path="/billing" element={<ProtectedRoute allowedRoles={['Super Admin']}><Billing /></ProtectedRoute>} />
+          <Route path="/staff" element={<ProtectedRoute allowedRoles={['Super Admin']}><Staff /></ProtectedRoute>} />
 
-          {/* Protected Shared Routes (Owner + Admin) */}
-          <Route path="/register" element={<ProtectedRoute allowedRoles={['Owner', 'Admin']}><Registration /></ProtectedRoute>} />
-          <Route path="/customers" element={<ProtectedRoute allowedRoles={['Owner', 'Admin']}><Customers /></ProtectedRoute>} />
-          <Route path="/repairs" element={<ProtectedRoute allowedRoles={['Owner', 'Admin']}><Repairs /></ProtectedRoute>} />
+          {/* Protected Shared Routes */}
+          <Route path="/register" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Registration /></ProtectedRoute>} />
+          <Route path="/customers" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'User']}><Customers /></ProtectedRoute>} />
+          <Route path="/repairs" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin', 'User']}><Repairs /></ProtectedRoute>} />
         </Routes>
       </AppLayout>
     </Router>

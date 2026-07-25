@@ -7,7 +7,7 @@ const Signup = () => {
     name: '',
     email: '',
     password: '',
-    role: 'Admin'
+    role: 'User'
   });
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -23,8 +23,9 @@ const Signup = () => {
     setTimeout(() => {
       try {
         const users = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-        
-        if (users.find(u => u.email === formData.email)) {
+        const normalizedEmail = formData.email.trim().toLowerCase();
+
+        if (users.find(u => u.email.toLowerCase() === normalizedEmail || u.email === formData.email)) {
           setError('Email is already registered.');
           setIsLoading(false);
           return;
@@ -32,18 +33,18 @@ const Signup = () => {
 
         const newUser = { 
           ...formData, 
+          email: normalizedEmail,
           id: Date.now().toString(),
-          status: formData.role === 'Owner' ? 'active' : 'pending' 
+          status: formData.role === 'Super Admin' ? 'active' : 'pending' 
         };
         users.push(newUser);
         localStorage.setItem('workshopUsers', JSON.stringify(users));
         
-        if (newUser.role === 'Admin') {
-          setSuccessMsg('Account created successfully. Please wait for an Owner to approve your registration.');
-          // Reset form data so they can't just spam it
-          setFormData({ name: '', email: '', password: '', role: 'Admin' });
+        if (newUser.role === 'Admin' || newUser.role === 'User') {
+          setSuccessMsg(`Account created successfully. Please wait for a Super Admin to approve your ${newUser.role} registration.`);
+          setFormData({ name: '', email: '', password: '', role: 'User' });
         } else {
-          // Auto-login for Owner
+          // Auto-login for Super Admin
           localStorage.setItem('currentUser', JSON.stringify({ name: newUser.name, email: newUser.email, role: newUser.role }));
           navigate('/');
         }
@@ -107,7 +108,7 @@ const Signup = () => {
               <input 
                 type="email" 
                 className="form-input" 
-                placeholder="john@gearshift.com" 
+                placeholder="john@gadgetspitstop.com" 
                 style={{ paddingLeft: '2.8rem', background: 'rgba(255,255,255,0.03)' }}
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -126,8 +127,8 @@ const Signup = () => {
                 value={formData.role}
                 onChange={(e) => setFormData({...formData, role: e.target.value})}
               >
-                <option value="Admin" style={{ background: 'var(--bg-secondary)' }}>Staff / Admin (Repairs & Intake)</option>
-                <option value="Owner" style={{ background: 'var(--bg-secondary)' }}>Owner (Full Access)</option>
+                <option value="Admin" style={{ background: 'var(--bg-secondary)' }}>Admin (Repairs & Intake)</option>
+                <option value="User" style={{ background: 'var(--bg-secondary)' }}>User (View Only)</option>
               </select>
             </div>
           </div>

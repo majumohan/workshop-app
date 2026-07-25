@@ -118,6 +118,37 @@ const Repairs = () => {
       }
     }
 
+    let finalInvoiceNumber = activeJob.invoiceNumber;
+    
+    if (status === 'Completed' && !finalInvoiceNumber) {
+      const completedJobs = repairs.filter(r => r.status === 'Completed' && r.invoiceNumber?.startsWith('GPS/'));
+      
+      const now = new Date();
+      let startYear = now.getFullYear();
+      if (now.getMonth() < 3) {
+        startYear -= 1;
+      }
+      const fyStr = `${startYear.toString().slice(-2)}-${(startYear + 1).toString().slice(-2)}`;
+      
+      const fyJobs = completedJobs.filter(r => r.invoiceNumber.endsWith(fyStr));
+      
+      let maxSeq = 0;
+      fyJobs.forEach(j => {
+        const parts = j.invoiceNumber.split('/');
+        if (parts.length === 3) {
+          const seqStr = parts[1].replace(/\\D/g, '');
+          const seq = parseInt(seqStr, 10);
+          if (!isNaN(seq) && seq > maxSeq) {
+            maxSeq = seq;
+          }
+        }
+      });
+      
+      const nextSeq = maxSeq + 1;
+      const paddedSeq = nextSeq.toString().padStart(2, '0');
+      finalInvoiceNumber = `GPS/A${paddedSeq}/${fyStr}`;
+    }
+
     const updatedJob = {
       ...activeJob,
       ...editFormData,
@@ -126,7 +157,8 @@ const Repairs = () => {
       parts: validParts,
       laborCost: totalLabor,
       totalCost: totalCost,
-      status: status
+      status: status,
+      invoiceNumber: finalInvoiceNumber
     };
 
     const updatedRepairs = repairs.map(r => r._id === activeJob._id ? updatedJob : r);
@@ -245,11 +277,11 @@ const Repairs = () => {
               <button className="close-btn" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
             </div>
             
-            <form onSubmit={handleSaveJob}>
+            <form onSubmit={handleSaveJob} style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 
                 {/* Editable Intake Data */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Customer Name</label>
                     <input type="text" className="form-input" name="customerName" value={editFormData.customerName} onChange={handleEditFormChange} disabled={modalMode === 'view'} />
@@ -350,7 +382,7 @@ const Repairs = () => {
                   </div>
                   
                   {parts.map((part, index) => (
-                    <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                    <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
                       <input 
                         type="text" 
                         className="form-input" 
@@ -383,7 +415,7 @@ const Repairs = () => {
                   ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Labor Cost (₹)</label>
                     <input type="number" className="form-input" value={laborCost} onChange={(e) => setLaborCost(e.target.value)} placeholder="0.00" disabled={modalMode === 'view'} />

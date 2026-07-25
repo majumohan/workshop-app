@@ -113,6 +113,7 @@ const Registration = () => {
       // Simulate API call delay
       setTimeout(() => {
         setIsSuccess(true);
+        alert("Registration completed successfully!");
         setTimeout(() => setIsSuccess(false), 3000);
         // Reset form
         setFormData({
@@ -148,33 +149,6 @@ const Registration = () => {
 
       <form onSubmit={handleSubmit} className="card glass-panel" style={{ padding: '2rem' }}>
         
-        {/* Customer Section */}
-        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--accent-primary)' }}>
-          <UserPlus size={20} />
-          Customer Details
-        </h3>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Customer Name</label>
-            <input type="text" className="form-input" name="customerName" value={formData.customerName} onChange={handleInputChange} required placeholder="Full Name" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Mobile Number</label>
-            <input type="tel" className="form-input" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} required placeholder="+1 234 567 8900" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Alternate Contact Number</label>
-            <input type="tel" className="form-input" name="alternateNumber" value={formData.alternateNumber} onChange={handleInputChange} placeholder="Optional" />
-          </div>
-          <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
-            <label className="form-label">Address</label>
-            <textarea className="form-input" name="address" value={formData.address} onChange={handleInputChange} rows="2" placeholder="Full residential address"></textarea>
-          </div>
-        </div>
-
-        <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '2rem 0' }} />
-
         {/* Bike Section */}
         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--accent-primary)' }}>
           <Bike size={20} />
@@ -238,6 +212,33 @@ const Registration = () => {
             </div>
           </div>
         )}
+
+        <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '2rem 0' }} />
+
+        {/* Customer Section */}
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', color: 'var(--accent-primary)' }}>
+          <UserPlus size={20} />
+          Customer Details
+        </h3>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Customer Name</label>
+            <input type="text" className="form-input" name="customerName" value={formData.customerName} onChange={handleInputChange} required placeholder="Full Name" />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Mobile Number</label>
+            <input type="tel" className="form-input" name="mobileNumber" value={formData.mobileNumber} onChange={handleInputChange} required placeholder="+1 234 567 8900" />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0 }}>
+            <label className="form-label">Alternate Contact Number</label>
+            <input type="tel" className="form-input" name="alternateNumber" value={formData.alternateNumber} onChange={handleInputChange} placeholder="Optional" />
+          </div>
+          <div className="form-group" style={{ marginBottom: 0, gridColumn: '1 / -1' }}>
+            <label className="form-label">Address</label>
+            <textarea className="form-input" name="address" value={formData.address} onChange={handleInputChange} rows="2" placeholder="Full residential address"></textarea>
+          </div>
+        </div>
 
         <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '2rem 0' }} />
 

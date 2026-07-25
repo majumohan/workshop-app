@@ -6,7 +6,7 @@ const Staff = () => {
 
   useEffect(() => {
     const storedUsers = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-    setUsers(storedUsers.filter(u => u.role === 'Admin'));
+    setUsers(storedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
   }, []);
 
   const handleApprove = (userId) => {
@@ -15,14 +15,14 @@ const Staff = () => {
       u.id === userId ? { ...u, status: 'active' } : u
     );
     localStorage.setItem('workshopUsers', JSON.stringify(updatedUsers));
-    setUsers(updatedUsers.filter(u => u.role === 'Admin'));
+    setUsers(updatedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
   };
 
   const handleReject = (userId) => {
     const allUsers = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
     const updatedUsers = allUsers.filter(u => u.id !== userId);
     localStorage.setItem('workshopUsers', JSON.stringify(updatedUsers));
-    setUsers(updatedUsers.filter(u => u.role === 'Admin'));
+    setUsers(updatedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
   };
 
   return (
@@ -33,7 +33,7 @@ const Staff = () => {
             <Shield size={36} />
             Staff Management
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Approve and manage Admin registrations</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>Approve and manage Staff and User registrations</p>
         </div>
       </div>
 
@@ -52,14 +52,14 @@ const Staff = () => {
               {users.length === 0 ? (
                 <tr>
                   <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No admin registrations found.
+                    No registrations pending or active found.
                   </td>
                 </tr>
               ) : (
                 users.map(user => (
                   <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
                     <td style={{ padding: '1rem' }}>{user.name}</td>
-                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{user.email}</td>
+                    <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{user.email} <span style={{fontSize: '0.8rem', color: 'var(--accent-primary)', marginLeft: '0.5rem'}}>[{user.role}]</span></td>
                     <td style={{ padding: '1rem' }}>
                       {user.status === 'pending' ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.4rem 0.8rem', borderRadius: '20px', background: 'rgba(245, 158, 11, 0.1)', color: 'var(--warning)', fontSize: '0.85rem' }}>
