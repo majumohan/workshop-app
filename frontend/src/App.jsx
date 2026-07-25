@@ -158,9 +158,6 @@ const AppLayout = ({ children }) => {
               <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{user.name}</span>
               <span style={{ fontSize: '0.7rem', color: 'var(--accent-primary)', textTransform: 'uppercase' }}>{user.role}</span>
             </div>
-            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'flex' }} title="Logout">
-              <LogOut size={24} />
-            </button>
             <button onClick={() => setIsMobileMenuOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex' }}>
               <Menu size={28} />
             </button>

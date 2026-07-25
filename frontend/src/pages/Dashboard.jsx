@@ -111,16 +111,6 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-        <button 
-          onClick={handleLogout}
-          className="btn btn-danger"
-          style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '8px' }}
-        >
-          <LogOut size={16} /> Logout
-        </button>
-      </div>
-
       <div className="mobile-stack" style={{ marginBottom: '2rem', flexWrap: 'wrap' }}>
         <div>
           <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome Back, {currentUser.name}</h1>
