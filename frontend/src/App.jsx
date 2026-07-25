@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut, Shield } from 'lucide-react';
 
 import Dashboard from './pages/Dashboard';
 import Registration from './pages/Registration';
@@ -9,6 +9,7 @@ import Billing from './pages/Billing';
 import Customers from './pages/Customers';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import Staff from './pages/Staff';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const Sidebar = () => {
@@ -28,6 +29,7 @@ const Sidebar = () => {
 
   const allNavItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Owner'] },
+    { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Owner'] },
     { name: 'New Intake', path: '/register', icon: <UserPlus size={20} />, roles: ['Owner', 'Admin'] },
     { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Owner', 'Admin'] },
     { name: 'Repairs', path: '/repairs', icon: <Wrench size={20} />, roles: ['Owner', 'Admin'] },
@@ -151,6 +153,7 @@ function App() {
           {/* Protected Owner Routes */}
           <Route path="/" element={<ProtectedRoute allowedRoles={['Owner']}><Dashboard /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute allowedRoles={['Owner']}><Billing /></ProtectedRoute>} />
+          <Route path="/staff" element={<ProtectedRoute allowedRoles={['Owner']}><Staff /></ProtectedRoute>} />
 
           {/* Protected Shared Routes (Owner + Admin) */}
           <Route path="/register" element={<ProtectedRoute allowedRoles={['Owner', 'Admin']}><Registration /></ProtectedRoute>} />

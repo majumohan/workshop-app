@@ -20,6 +20,12 @@ const Login = () => {
         const user = users.find(u => u.email === email && u.password === password);
 
         if (user) {
+          if (user.status === 'pending') {
+            setError('Your account is pending owner approval. Please wait to be admitted.');
+            setIsLoading(false);
+            return;
+          }
+
           localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, role: user.role }));
           // Redirect to appropriate dashboard based on role
           if (user.role === 'Admin') {

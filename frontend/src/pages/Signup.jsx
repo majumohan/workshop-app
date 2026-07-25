@@ -10,12 +10,14 @@ const Signup = () => {
     role: 'Admin'
   });
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSignup = (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
     setIsLoading(true);
 
     setTimeout(() => {
@@ -28,16 +30,21 @@ const Signup = () => {
           return;
         }
 
-        const newUser = { ...formData, id: Date.now().toString() };
+        const newUser = { 
+          ...formData, 
+          id: Date.now().toString(),
+          status: formData.role === 'Owner' ? 'active' : 'pending' 
+        };
         users.push(newUser);
         localStorage.setItem('workshopUsers', JSON.stringify(users));
         
-        // Auto-login
-        localStorage.setItem('currentUser', JSON.stringify({ name: newUser.name, email: newUser.email, role: newUser.role }));
-        
         if (newUser.role === 'Admin') {
-          navigate('/repairs');
+          setSuccessMsg('Account created successfully. Please wait for an Owner to approve your registration.');
+          // Reset form data so they can't just spam it
+          setFormData({ name: '', email: '', password: '', role: 'Admin' });
         } else {
+          // Auto-login for Owner
+          localStorage.setItem('currentUser', JSON.stringify({ name: newUser.name, email: newUser.email, role: newUser.role }));
           navigate('/');
         }
       } catch (err) {
@@ -67,6 +74,12 @@ const Signup = () => {
         {error && (
           <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', color: 'var(--danger)', padding: '0.8rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', textAlign: 'center' }}>
             {error}
+          </div>
+        )}
+
+        {successMsg && (
+          <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', color: 'var(--success)', padding: '0.8rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.9rem', textAlign: 'center' }}>
+            {successMsg}
           </div>
         )}
 
