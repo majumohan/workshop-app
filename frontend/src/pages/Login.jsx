@@ -23,10 +23,10 @@ const Login = () => {
 
         localStorage.setItem('currentUser', JSON.stringify({ id: user.id, name: user.name, email: user.email, role: user.role }));
         // Redirect to appropriate dashboard based on role
-        if (user.role === 'Admin' || user.role === 'User') {
+        if (user.role === 'User') {
           navigate('/repairs'); 
         } else {
-          navigate('/'); // Super Admins go to main dashboard
+          navigate('/'); // Admins and Super Admins go to main dashboard
         }
       } catch (err) {
         if (err.response && err.response.data && err.response.data.message) {

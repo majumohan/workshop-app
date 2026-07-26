@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   if (!user) return null;
 
   const allNavItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Super Admin'] },
+    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Super Admin', 'Admin'] },
     { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Super Admin'] },
     { name: 'New Intake', path: '/register', icon: <UserPlus size={20} />, roles: ['Super Admin', 'Admin'] },
     { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
@@ -183,7 +183,7 @@ function App() {
           <Route path="/superadmin" element={<DeveloperAuth />} />
 
           {/* Protected Super Admin Routes */}
-          <Route path="/" element={<ProtectedRoute allowedRoles={['Super Admin']}><Dashboard /></ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Dashboard /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute allowedRoles={['Super Admin']}><Billing /></ProtectedRoute>} />
           <Route path="/staff" element={<ProtectedRoute allowedRoles={['Super Admin']}><Staff /></ProtectedRoute>} />
 
