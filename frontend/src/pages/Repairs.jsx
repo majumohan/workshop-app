@@ -36,9 +36,15 @@ const Repairs = () => {
   ];
 
   useEffect(() => {
-    // Load from localStorage (mocking DB)
-    const storedJobs = JSON.parse(localStorage.getItem('workshopJobs') || '[]');
-    setRepairs(storedJobs);
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+        setRepairs(res.data);
+      } catch (err) {
+        console.error('Failed to fetch jobs', err);
+      }
+    };
+    fetchJobs();
   }, []);
 
   const openJobModal = (job, mode) => {
@@ -163,7 +169,9 @@ const Repairs = () => {
 
     const updatedRepairs = repairs.map(r => r._id === activeJob._id ? updatedJob : r);
     setRepairs(updatedRepairs);
-    localStorage.setItem('workshopJobs', JSON.stringify(updatedRepairs));
+    
+    axios.put(`${import.meta.env.VITE_API_URL}/jobs/${activeJob._id}`, updatedJob)
+      .catch(err => console.error('Failed to update job on server:', err));
     
     setIsModalOpen(false);
   };

@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserPlus, Bike, Save, CheckCircle, Camera, UploadCloud, AlertCircle, Clock, Wrench, History } from 'lucide-react';
 import axios from 'axios';
 
 const Registration = () => {
+  const [allJobs, setAllJobs] = useState([]);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+        setAllJobs(res.data);
+      } catch (err) {
+        console.error('Failed to fetch jobs history', err);
+      }
+    };
+    fetchJobs();
+  }, []);
+
   const [formData, setFormData] = useState({
     // Customer Details
     customerName: '',
@@ -54,8 +68,7 @@ const Registration = () => {
     const updatedForm = { ...formData, [name]: value };
 
     if (name === 'registrationNumber' && value.trim().length >= 3) {
-      const existingJobs = JSON.parse(localStorage.getItem('workshopJobs') || '[]');
-      const matches = existingJobs.filter(j => (j.registrationNumber || '').toUpperCase() === value.trim().toUpperCase());
+      const matches = allJobs.filter(j => (j.registrationNumber || '').toUpperCase() === value.trim().toUpperCase());
       
       if (matches.length > 0) {
         matches.sort((a, b) => Number(b._id) - Number(a._id));
@@ -91,7 +104,6 @@ const Registration = () => {
     
     try {
       const newJob = {
-        _id: Date.now().toString(),
         ...formData,
         complaints: selectedComplaints,
         photos: photos,
@@ -102,19 +114,16 @@ const Registration = () => {
         totalCost: 0
       };
 
-      // In a fully integrated backend, this would hit POST /api/repairs or similar
       console.log('Submitting Registration Data:', newJob);
-      console.log('Photos to upload:', photos);
       
-      // Save to localStorage to simulate DB and pass to Repairs page
-      const existingJobs = JSON.parse(localStorage.getItem('workshopJobs') || '[]');
-      localStorage.setItem('workshopJobs', JSON.stringify([newJob, ...existingJobs]));
+      await axios.post(`${import.meta.env.VITE_API_URL}/jobs`, newJob);
+      
+      setIsSuccess(true);
+      // Refresh local history array
+      setAllJobs([newJob, ...allJobs]);
 
-      // Simulate API call delay
       setTimeout(() => {
-        setIsSuccess(true);
-        alert("Registration completed successfully!");
-        setTimeout(() => setIsSuccess(false), 3000);
+        setIsSuccess(false);
         // Reset form
         setFormData({
           customerName: '', mobileNumber: '', alternateNumber: '', address: '',
@@ -126,7 +135,7 @@ const Registration = () => {
         setPhotos({
           frontView: null, backView: null, leftSide: null, rightSide: null, odometer: null, damagedParts: null
         });
-      }, 800);
+      }, 3000);
 
     } catch (error) {
       console.error('Registration failed:', error);

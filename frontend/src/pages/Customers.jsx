@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Phone, MapPin, Calendar, Clock, CheckCircle, Wrench, X, Eye } from 'lucide-react';
+import axios from 'axios';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -8,9 +9,10 @@ const Customers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('workshopJobs');
-      const jobs = stored ? JSON.parse(stored) : [];
+    const loadCustomers = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+        const jobs = res.data;
       
       // Group jobs by customer (using mobileNumber as unique identifier)
       const customerMap = {};
@@ -49,9 +51,11 @@ const Customers = () => {
       });
 
       setCustomers(customerArray);
-    } catch (error) {
-      console.error("Failed to load customers", error);
-    }
+      } catch (error) {
+        console.error("Failed to load customers", error);
+      }
+    };
+    loadCustomers();
   }, []);
 
   const openHistoryModal = (customer) => {

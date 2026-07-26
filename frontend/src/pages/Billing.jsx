@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, IndianRupee, Download, FileText, Printer, CheckCircle, X } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
+import axios from 'axios';
 
 const Billing = () => {
   const [bills, setBills] = useState([]);
@@ -9,10 +10,10 @@ const Billing = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   
   // Load data
-  const loadData = () => {
+  const loadData = async () => {
     try {
-      const stored = localStorage.getItem('workshopJobs');
-      const jobs = stored ? JSON.parse(stored) : [];
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+      const jobs = res.data;
       
       // Bills are just completed jobs
       const completedJobs = jobs.filter(j => j.status === 'Completed');
@@ -49,19 +50,12 @@ const Billing = () => {
     loadData();
   }, []);
 
-  const handleRecordPayment = (jobId) => {
+  const handleRecordPayment = async (jobId) => {
     try {
-      const stored = localStorage.getItem('workshopJobs');
-      const jobs = stored ? JSON.parse(stored) : [];
-      
-      const jobIndex = jobs.findIndex(j => j._id === jobId);
-      if (jobIndex > -1) {
-        jobs[jobIndex].paymentStatus = 'Paid';
-        localStorage.setItem('workshopJobs', JSON.stringify(jobs));
-        loadData(); // refresh UI
-      }
+      await axios.put(`${import.meta.env.VITE_API_URL}/jobs/${jobId}`, { paymentStatus: 'Paid' });
+      loadData(); // refresh UI
     } catch(e) {
-      console.error(e);
+      console.error("Failed to record payment", e);
     }
   };
 

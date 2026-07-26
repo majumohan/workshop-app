@@ -7,6 +7,7 @@ const Inspection = require('../models/Inspection');
 const Repair = require('../models/Repair');
 const Bill = require('../models/Bill');
 const User = require('../models/User');
+const Job = require('../models/Job');
 
 // --- Auth ---
 router.post('/auth/register', async (req, res) => {
@@ -53,6 +54,46 @@ router.post('/auth/login', async (req, res) => {
     
     // In a real app we'd return a JWT, but here we'll just return the user profile
     res.json({ id: user._id, name: user.name, email: user.email, role: user.role, status: user.status });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// --- Jobs (Unified Storage) ---
+router.get('/jobs', async (req, res) => {
+  try {
+    const jobs = await Job.find().sort({ createdAt: -1 });
+    res.json(jobs);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/jobs', async (req, res) => {
+  try {
+    const newJob = new Job(req.body);
+    const savedJob = await newJob.save();
+    res.status(201).json(savedJob);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.put('/jobs/:id', async (req, res) => {
+  try {
+    const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedJob) return res.status(404).json({ message: 'Job not found' });
+    res.json(updatedJob);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+router.delete('/jobs/:id', async (req, res) => {
+  try {
+    const deletedJob = await Job.findByIdAndDelete(req.params.id);
+    if (!deletedJob) return res.status(404).json({ message: 'Job not found' });
+    res.json({ message: 'Job deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -220,13 +261,15 @@ router.post('/bills', async (req, res) => {
 // --- Dashboard Stats ---
 router.get('/stats', async (req, res) => {
     try {
-        const totalCustomers = await Customer.countDocuments();
-        const activeRepairs = await Repair.countDocuments({ status: { $ne: 'Completed' } });
-        const recentInspections = await Inspection.countDocuments(); // Could limit to last 7 days
+        const jobs = await Job.find();
+        const uniqueCustomers = new Set(jobs.map(j => j.mobileNumber));
+        const totalCustomers = uniqueCustomers.size;
+        const activeRepairs = jobs.filter(j => j.status !== 'Completed').length;
+        const recentInspections = jobs.length;
         res.json({ totalCustomers, activeRepairs, recentInspections });
     } catch(err) {
         res.status(500).json({ message: err.message });
     }
-})
+});
 
 module.exports = router;

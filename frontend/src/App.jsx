@@ -30,11 +30,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
   const allNavItems = [
     { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} />, roles: ['Super Admin', 'Admin'] },
-    { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Super Admin'] },
+    { name: 'Staff Management', path: '/staff', icon: <Shield size={20} />, roles: ['Super Admin', 'Admin'] },
     { name: 'New Intake', path: '/register', icon: <UserPlus size={20} />, roles: ['Super Admin', 'Admin'] },
     { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
     { name: 'Repairs', path: '/repairs', icon: <Wrench size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
-    { name: 'Billing', path: '/billing', icon: <Receipt size={20} />, roles: ['Super Admin'] },
+    { name: 'Billing', path: '/billing', icon: <Receipt size={20} />, roles: ['Super Admin', 'Admin'] },
   ];
 
   const navItems = allNavItems.filter(item => item.roles.includes(user.role));
@@ -184,8 +184,8 @@ function App() {
 
           {/* Protected Super Admin Routes */}
           <Route path="/" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Dashboard /></ProtectedRoute>} />
-          <Route path="/billing" element={<ProtectedRoute allowedRoles={['Super Admin']}><Billing /></ProtectedRoute>} />
-          <Route path="/staff" element={<ProtectedRoute allowedRoles={['Super Admin']}><Staff /></ProtectedRoute>} />
+          <Route path="/billing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Billing /></ProtectedRoute>} />
+          <Route path="/staff" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Staff /></ProtectedRoute>} />
 
           {/* Protected Shared Routes */}
           <Route path="/register" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Registration /></ProtectedRoute>} />

@@ -12,15 +12,17 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('workshopJobs');
-      const jobs = stored ? JSON.parse(stored) : [];
-      setAllJobs(jobs);
-    } catch (error) {
-      console.error("Failed to load dashboard stats", error);
-    } finally {
-      setLoading(false);
-    }
+    const fetchJobs = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+        setAllJobs(res.data);
+      } catch (error) {
+        console.error("Failed to load dashboard stats", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
   }, []);
 
   const handleLogout = () => {
