@@ -69,7 +69,7 @@ const Billing = () => {
     const element = document.getElementById('printable-invoice');
     const opt = {
       margin:       [0.5, 0.5, 0.5, 0.5],
-      filename:     `${selectedInvoice.invoiceNumber ? selectedInvoice.invoiceNumber.replace(/\\//g, '-') : 'INV-' + selectedInvoice._id.slice(-6)}.pdf`,
+      filename:     `${selectedInvoice.invoiceNumber ? String(selectedInvoice.invoiceNumber).replaceAll('/', '-') : 'INV-' + selectedInvoice._id.slice(-6)}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2 },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -203,30 +203,30 @@ const Billing = () => {
             </div>
 
             {/* Printable Invoice Area */}
-            <div id="printable-invoice" style={{ padding: '2.5rem', background: '#fff', color: '#1a1a1a', borderRadius: '0 0 12px 12px' }}>
+            <div id="printable-invoice" style={{ padding: 'clamp(1rem, 5vw, 2.5rem)', background: '#fff', color: '#1a1a1a', borderRadius: '0 0 12px 12px' }}>
               
-              <div className="flex-between" style={{ borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
                 <div>
-                  <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 0.5rem 0', color: '#1a1a1a' }}>GADGETS PITSTOP</h1>
+                  <h1 style={{ fontSize: 'clamp(1.5rem, 6vw, 2rem)', fontWeight: 'bold', margin: '0 0 0.5rem 0', color: '#1a1a1a' }}>GADGETS PITSTOP</h1>
                   <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Bharata Mata College, NEAR, Thrikkakara</p>
                   <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Kakkanad, Kerala 682021</p>
                   <p style={{ margin: '0', color: '#4b5563', fontSize: '0.9rem' }}>Phone: (555) 123-4567</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <h2 style={{ fontSize: '1.8rem', color: '#6366f1', margin: '0 0 0.5rem 0', letterSpacing: '1px', textTransform: 'uppercase' }}>Invoice</h2>
+                <div style={{ textAlign: 'left', minWidth: '150px' }}>
+                  <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.8rem)', color: '#6366f1', margin: '0 0 0.5rem 0', letterSpacing: '1px', textTransform: 'uppercase' }}>Invoice</h2>
                   <p style={{ margin: '0', color: '#4b5563', fontWeight: '500' }}>#{selectedInvoice.invoiceNumber || `INV-${selectedInvoice._id.slice(-6)}`}</p>
                   <p style={{ margin: '0', color: '#4b5563' }}>Date: {selectedInvoice.dateLogged}</p>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
-                <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ minWidth: '150px' }}>
                   <h4 style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px', margin: '0 0 0.5rem 0' }}>Bill To</h4>
                   <p style={{ margin: '0 0 0.2rem 0', fontWeight: 'bold' }}>{selectedInvoice.customerName}</p>
                   <p style={{ margin: '0 0 0.2rem 0', color: '#4b5563' }}>{selectedInvoice.mobileNumber}</p>
                   <p style={{ margin: '0', color: '#4b5563' }}>{selectedInvoice.address || 'N/A'}</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
+                <div style={{ textAlign: 'left', minWidth: '150px' }}>
                   <h4 style={{ color: '#9ca3af', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px', margin: '0 0 0.5rem 0' }}>Vehicle Details</h4>
                   <p style={{ margin: '0 0 0.2rem 0', fontWeight: 'bold' }}>{selectedInvoice.bikeBrand} {selectedInvoice.bikeModel}</p>
                   <p style={{ margin: '0 0 0.2rem 0', color: '#4b5563', textTransform: 'uppercase' }}>Reg: {selectedInvoice.registrationNumber}</p>

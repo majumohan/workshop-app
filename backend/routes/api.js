@@ -6,6 +6,88 @@ const Bike = require('../models/Bike');
 const Inspection = require('../models/Inspection');
 const Repair = require('../models/Repair');
 const Bill = require('../models/Bill');
+const User = require('../models/User');
+
+// --- Auth ---
+router.post('/auth/register', async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    
+    // Check if email already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email is already registered.' });
+    }
+    
+    const newUser = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: role || 'User',
+      status: role === 'Super Admin' ? 'active' : 'pending'
+    });
+    
+    const savedUser = await newUser.save();
+    res.status(201).json(savedUser);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/auth/login', async (req, res) => {
+  try {
+    const { email, password, role } = req.body;
+    const user = await User.findOne({ email: email.toLowerCase(), password, role });
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email, password, or role.' });
+    }
+    
+    if (user.status === 'pending') {
+      return res.status(403).json({ message: 'Your account is pending Super Admin approval.' });
+    }
+    
+    if (user.status === 'rejected') {
+      return res.status(403).json({ message: 'Your account request was rejected.' });
+    }
+    
+    // In a real app we'd return a JWT, but here we'll just return the user profile
+    res.json({ id: user._id, name: user.name, email: user.email, role: user.role, status: user.status });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// --- Users (Staff Management) ---
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({ role: { $in: ['Admin', 'User'] } }).sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.put('/users/:id/approve', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { status: 'active' }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.delete('/users/:id/reject', async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User rejected and deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 // --- Customers ---
 router.get('/customers', async (req, res) => {

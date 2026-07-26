@@ -113,7 +113,7 @@ const Dashboard = () => {
     <div className="animate-fade-in">
       <div className="mobile-stack" style={{ marginBottom: '2rem', flexWrap: 'wrap' }}>
         <div>
-          <h1 className="text-gradient" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Welcome Back, {currentUser.name}</h1>
+          <h1 className="text-gradient" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', marginBottom: '0.5rem', wordBreak: 'break-word' }}>Welcome Back, {currentUser.name}</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Here's what's happening in your workshop.</p>
         </div>
         
@@ -127,7 +127,7 @@ const Dashboard = () => {
             New Intake
           </button>
         
-        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0 0.5rem' }}>
             <CalendarIcon size={16} color="var(--accent-primary)" />
             <select 
@@ -245,10 +245,10 @@ const Dashboard = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {recentCompleted.length > 0 ? recentCompleted.map(job => (
               <div key={job._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '8px', borderLeft: '3px solid var(--success)' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Bike size={20} color="var(--success)" />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{ fontSize: '0.95rem', margin: '0 0 0.2rem 0' }}>{job.bikeBrand} {job.bikeModel}</h4>
                   <div style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.4rem' }}>{job.registrationNumber}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

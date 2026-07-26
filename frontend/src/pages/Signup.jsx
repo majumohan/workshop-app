@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus, Mail, Lock, User, Briefcase } from 'lucide-react';
+import axios from 'axios';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -20,36 +21,25 @@ const Signup = () => {
     setSuccessMsg('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const users = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-        const normalizedEmail = formData.email.trim().toLowerCase();
-
-        if (users.find(u => u.email.toLowerCase() === normalizedEmail || u.email === formData.email)) {
-          setError('Email is already registered.');
-          setIsLoading(false);
-          return;
-        }
-
-        const newUser = { 
-          ...formData, 
-          email: normalizedEmail,
-          id: Date.now().toString(),
-          status: formData.role === 'Super Admin' ? 'active' : 'pending' 
-        };
-        users.push(newUser);
-        localStorage.setItem('workshopUsers', JSON.stringify(users));
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData);
+        const newUser = res.data;
         
         if (newUser.role === 'Admin' || newUser.role === 'User') {
           setSuccessMsg(`Account created successfully. Please wait for a Super Admin to approve your ${newUser.role} registration.`);
           setFormData({ name: '', email: '', password: '', role: 'User' });
         } else {
           // Auto-login for Super Admin
-          localStorage.setItem('currentUser', JSON.stringify({ name: newUser.name, email: newUser.email, role: newUser.role }));
+          localStorage.setItem('currentUser', JSON.stringify({ id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }));
           navigate('/');
         }
       } catch (err) {
-        setError('System error. Please try again.');
+        if (err.response && err.response.data && err.response.data.message) {
+            setError(err.response.data.message);
+        } else {
+            setError('System error. Please try again.');
+        }
       } finally {
         setIsLoading(false);
       }

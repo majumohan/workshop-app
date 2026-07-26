@@ -167,6 +167,7 @@ body {
   padding: 1.5rem;
   border: 1px solid var(--border-color);
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  min-width: 0;
 }
 
 .card:hover {
@@ -181,6 +182,9 @@ body {
   border-radius: 12px;
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
+  width: 100%;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -192,6 +196,7 @@ body {
 .table th, .table td {
   padding: 1rem;
   border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
 }
 
 .table th {

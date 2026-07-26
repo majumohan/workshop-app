@@ -1,28 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, CheckCircle, Clock } from 'lucide-react';
+import axios from 'axios';
 
 const Staff = () => {
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    const storedUsers = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-    setUsers(storedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
-  }, []);
-
-  const handleApprove = (userId) => {
-    const allUsers = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-    const updatedUsers = allUsers.map(u => 
-      u.id === userId ? { ...u, status: 'active' } : u
-    );
-    localStorage.setItem('workshopUsers', JSON.stringify(updatedUsers));
-    setUsers(updatedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/users`);
+      setUsers(res.data);
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    }
   };
 
-  const handleReject = (userId) => {
-    const allUsers = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-    const updatedUsers = allUsers.filter(u => u.id !== userId);
-    localStorage.setItem('workshopUsers', JSON.stringify(updatedUsers));
-    setUsers(updatedUsers.filter(u => u.role === 'Admin' || u.role === 'User'));
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleApprove = async (userId) => {
+    try {
+      await axios.put(`${import.meta.env.VITE_API_URL}/users/${userId}/approve`);
+      fetchUsers();
+    } catch (err) {
+      console.error('Failed to approve user', err);
+    }
+  };
+
+  const handleReject = async (userId) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/users/${userId}/reject`);
+      fetchUsers();
+    } catch (err) {
+      console.error('Failed to reject user', err);
+    }
   };
 
   return (
@@ -57,7 +68,7 @@ const Staff = () => {
                 </tr>
               ) : (
                 users.map(user => (
-                  <tr key={user.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
+                  <tr key={user._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
                     <td style={{ padding: '1rem' }}>{user.name}</td>
                     <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{user.email} <span style={{fontSize: '0.8rem', color: 'var(--accent-primary)', marginLeft: '0.5rem'}}>[{user.role}]</span></td>
                     <td style={{ padding: '1rem' }}>
@@ -75,14 +86,14 @@ const Staff = () => {
                       {user.status === 'pending' && (
                         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                           <button 
-                            onClick={() => handleApprove(user.id)}
+                            onClick={() => handleApprove(user._id)}
                             className="btn btn-primary"
                             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}
                           >
                             Approve
                           </button>
                           <button 
-                            onClick={() => handleReject(user.id)}
+                            onClick={() => handleReject(user._id)}
                             style={{ padding: '0.5rem 1rem', fontSize: '0.9rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', cursor: 'pointer' }}
                           >
                             Reject

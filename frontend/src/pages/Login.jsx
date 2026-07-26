@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, Mail, Lock, ShieldCheck, Briefcase } from 'lucide-react';
+import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,31 +16,24 @@ const Login = () => {
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const users = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-        const normalizedEmail = email.trim().toLowerCase();
-        const user = users.find(u => (u.email.toLowerCase() === normalizedEmail || u.email === email) && u.password === password && u.role === role);
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password, role });
+        const user = res.data;
 
-        if (user) {
-          if (user.status === 'pending') {
-            setError('Your account is pending Super Admin approval. Please wait to be admitted.');
-            setIsLoading(false);
-            return;
-          }
-
-          localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, role: user.role }));
-          // Redirect to appropriate dashboard based on role
-          if (user.role === 'Admin' || user.role === 'User') {
-            navigate('/repairs'); 
-          } else {
-            navigate('/'); // Super Admins go to main dashboard
-          }
+        localStorage.setItem('currentUser', JSON.stringify({ id: user.id, name: user.name, email: user.email, role: user.role }));
+        // Redirect to appropriate dashboard based on role
+        if (user.role === 'Admin' || user.role === 'User') {
+          navigate('/repairs'); 
         } else {
-          setError('Invalid email, password, or role. Please try again.');
+          navigate('/'); // Super Admins go to main dashboard
         }
       } catch (err) {
-        setError('System error. Please try again.');
+        if (err.response && err.response.data && err.response.data.message) {
+            setError(err.response.data.message);
+        } else {
+            setError('System error. Please try again.');
+        }
       } finally {
         setIsLoading(false);
       }
