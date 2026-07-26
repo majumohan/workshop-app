@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert, Mail, Lock, User, LogIn, UserPlus } from 'lucide-react';
+import axios from 'axios';
 
 const DeveloperAuth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,49 +15,39 @@ const DeveloperAuth = () => {
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
-        const users = JSON.parse(localStorage.getItem('workshopUsers') || '[]');
-        const normalizedEmail = formData.email.trim().toLowerCase();
-
         if (isLogin) {
           // Login Logic
-          const user = users.find(u => 
-            (u.email.toLowerCase() === normalizedEmail || u.email === formData.email) && 
-            u.password === formData.password && 
-            u.role === 'Super Admin'
-          );
-
-          if (user) {
-            localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, role: user.role }));
-            navigate('/');
-          } else {
-            setError('Invalid credentials or you are not a Super Admin.');
-          }
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { 
+            email: formData.email, 
+            password: formData.password, 
+            role: 'Super Admin' 
+          });
+          const user = res.data;
+          
+          localStorage.setItem('currentUser', JSON.stringify({ id: user.id, name: user.name, email: user.email, role: user.role }));
+          navigate('/');
         } else {
           // Registration Logic
-          if (users.find(u => u.email.toLowerCase() === normalizedEmail || u.email === formData.email)) {
-            setError('Email is already registered.');
-            setIsLoading(false);
-            return;
-          }
-
-          const newUser = { 
-            ...formData, 
-            role: 'Super Admin',
-            email: normalizedEmail,
-            id: Date.now().toString(),
-            status: 'active' // Super Admins are automatically active
-          };
-          users.push(newUser);
-          localStorage.setItem('workshopUsers', JSON.stringify(users));
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+            role: 'Super Admin'
+          });
+          const newUser = res.data;
           
           // Auto-login
-          localStorage.setItem('currentUser', JSON.stringify({ name: newUser.name, email: newUser.email, role: newUser.role }));
+          localStorage.setItem('currentUser', JSON.stringify({ id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }));
           navigate('/');
         }
       } catch (err) {
-        setError('System error. Please try again.');
+        if (err.response && err.response.data && err.response.data.message) {
+            setError(err.response.data.message);
+        } else {
+            setError('System error. Please try again.');
+        }
       } finally {
         setIsLoading(false);
       }
