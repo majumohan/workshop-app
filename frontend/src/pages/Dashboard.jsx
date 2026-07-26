@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Wrench, ClipboardCheck, TrendingUp, Bike, Calendar as CalendarIcon, LogOut, PlusCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { socket } from '../socket';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -22,7 +23,22 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+    
     fetchJobs();
+
+    const onJobChange = () => {
+      fetchJobs();
+    };
+
+    socket.on('jobCreated', onJobChange);
+    socket.on('jobUpdated', onJobChange);
+    socket.on('jobDeleted', onJobChange);
+
+    return () => {
+      socket.off('jobCreated', onJobChange);
+      socket.off('jobUpdated', onJobChange);
+      socket.off('jobDeleted', onJobChange);
+    };
   }, []);
 
   const handleLogout = () => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, IndianRupee, Download, FileText, Printer, CheckCircle, X } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 import axios from 'axios';
+import { socket } from '../socket';
 
 const Billing = () => {
   const [bills, setBills] = useState([]);
@@ -48,6 +49,20 @@ const Billing = () => {
 
   useEffect(() => {
     loadData();
+
+    const onJobChange = () => {
+      loadData();
+    };
+
+    socket.on('jobCreated', onJobChange);
+    socket.on('jobUpdated', onJobChange);
+    socket.on('jobDeleted', onJobChange);
+
+    return () => {
+      socket.off('jobCreated', onJobChange);
+      socket.off('jobUpdated', onJobChange);
+      socket.off('jobDeleted', onJobChange);
+    };
   }, []);
 
   const handleRecordPayment = async (jobId) => {

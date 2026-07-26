@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Wrench, Calendar, CheckCircle, Clock, X, Trash2, Edit, Save, Plus, Camera, UploadCloud, Eye } from 'lucide-react';
 import axios from 'axios';
+import { socket } from '../socket';
 
 const Repairs = () => {
   const [repairs, setRepairs] = useState([]);
@@ -45,6 +46,20 @@ const Repairs = () => {
       }
     };
     fetchJobs();
+
+    const onJobChange = () => {
+      fetchJobs();
+    };
+
+    socket.on('jobCreated', onJobChange);
+    socket.on('jobUpdated', onJobChange);
+    socket.on('jobDeleted', onJobChange);
+
+    return () => {
+      socket.off('jobCreated', onJobChange);
+      socket.off('jobUpdated', onJobChange);
+      socket.off('jobDeleted', onJobChange);
+    };
   }, []);
 
   const openJobModal = (job, mode) => {

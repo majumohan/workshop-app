@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Phone, MapPin, Calendar, Clock, CheckCircle, Wrench, X, Eye } from 'lucide-react';
 import axios from 'axios';
+import { socket } from '../socket';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -56,6 +57,20 @@ const Customers = () => {
       }
     };
     loadCustomers();
+
+    const onJobChange = () => {
+      loadCustomers();
+    };
+
+    socket.on('jobCreated', onJobChange);
+    socket.on('jobUpdated', onJobChange);
+    socket.on('jobDeleted', onJobChange);
+
+    return () => {
+      socket.off('jobCreated', onJobChange);
+      socket.off('jobUpdated', onJobChange);
+      socket.off('jobDeleted', onJobChange);
+    };
   }, []);
 
   const openHistoryModal = (customer) => {
