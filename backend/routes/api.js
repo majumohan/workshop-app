@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const uploadLocal = multer({ storage: multer.memoryStorage() });
 const { upload } = require('../config/cloudinary');
 const Customer = require('../models/Customer');
 const Bike = require('../models/Bike');
@@ -273,6 +275,76 @@ router.get('/stats', async (req, res) => {
     } catch(err) {
         res.status(500).json({ message: err.message });
     }
+});
+
+// --- Backup & Restore ---
+router.get('/backup', async (req, res) => {
+  try {
+    const backupData = {
+      jobs: await Job.find(),
+      users: await User.find(),
+      customers: await Customer.find(),
+      bikes: await Bike.find(),
+      inspections: await Inspection.find(),
+      repairs: await Repair.find(),
+      bills: await Bill.find()
+    };
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename=backup-${new Date().toISOString().slice(0, 10)}.json`);
+    res.send(JSON.stringify(backupData));
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/restore', uploadLocal.single('backupFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No backup file uploaded' });
+    }
+
+    const backupData = JSON.parse(req.file.buffer.toString('utf8'));
+
+    // Clear existing data
+    await Job.deleteMany({});
+    await User.deleteMany({});
+    await Customer.deleteMany({});
+    await Bike.deleteMany({});
+    await Inspection.deleteMany({});
+    await Repair.deleteMany({});
+    await Bill.deleteMany({});
+
+    // Insert restored data
+    if (backupData.jobs && backupData.jobs.length) await Job.insertMany(backupData.jobs);
+    if (backupData.users && backupData.users.length) await User.insertMany(backupData.users);
+    if (backupData.customers && backupData.customers.length) await Customer.insertMany(backupData.customers);
+    if (backupData.bikes && backupData.bikes.length) await Bike.insertMany(backupData.bikes);
+    if (backupData.inspections && backupData.inspections.length) await Inspection.insertMany(backupData.inspections);
+    if (backupData.repairs && backupData.repairs.length) await Repair.insertMany(backupData.repairs);
+    if (backupData.bills && backupData.bills.length) await Bill.insertMany(backupData.bills);
+
+    res.json({ message: 'Restore successful' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error restoring data: ' + err.message });
+  }
+});
+
+router.delete('/clear-data', async (req, res) => {
+  try {
+    await Job.deleteMany({});
+    await Customer.deleteMany({});
+    await Bike.deleteMany({});
+    await Inspection.deleteMany({});
+    await Repair.deleteMany({});
+    await Bill.deleteMany({});
+    // Delete all users EXCEPT Super Admins
+    await User.deleteMany({ role: { $ne: 'Super Admin' } });
+
+    res.json({ message: 'All workshop data cleared successfully. Super Admin accounts have been preserved.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error clearing data: ' + err.message });
+  }
 });
 
 module.exports = router;

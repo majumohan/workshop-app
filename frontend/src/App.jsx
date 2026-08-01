@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut, Shield, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Receipt, UserPlus, LogOut, Shield, Menu, X, Settings as SettingsIcon } from 'lucide-react';
 
 import Dashboard from './pages/Dashboard';
 import Registration from './pages/Registration';
@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Staff from './pages/Staff';
 import DeveloperAuth from './pages/DeveloperAuth';
+import Settings from './pages/Settings';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -35,6 +36,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Customers', path: '/customers', icon: <Users size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
     { name: 'Repairs', path: '/repairs', icon: <Wrench size={20} />, roles: ['Super Admin', 'Admin', 'User'] },
     { name: 'Billing', path: '/billing', icon: <Receipt size={20} />, roles: ['Super Admin', 'Admin'] },
+    { name: 'Settings', path: '/settings', icon: <SettingsIcon size={20} />, roles: ['Super Admin', 'Admin'] },
   ];
 
   const navItems = allNavItems.filter(item => item.roles.includes(user.role));
@@ -186,6 +188,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Dashboard /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Billing /></ProtectedRoute>} />
           <Route path="/staff" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Staff /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Settings /></ProtectedRoute>} />
 
           {/* Protected Shared Routes */}
           <Route path="/register" element={<ProtectedRoute allowedRoles={['Super Admin', 'Admin']}><Registration /></ProtectedRoute>} />

@@ -56,11 +56,22 @@ const Dashboard = () => {
   const filteredJobs = allJobs.filter(job => {
     if (filterMode === 'all') return true;
     
-    // Attempt to parse the job date
-    // Note: jobs created via new Date().toLocaleDateString() might format as MM/DD/YYYY or DD/MM/YYYY
-    // We convert it to a Date object safely.
-    const jobDate = new Date(job.dateLogged);
-    if (isNaN(jobDate.getTime())) return true; // fallback if date is unparseable
+    // Attempt to parse the job date safely
+    let jobDate = new Date(job.createdAt);
+    if (isNaN(jobDate.getTime())) {
+      jobDate = new Date(job.dateLogged);
+      if (isNaN(jobDate.getTime()) && job.dateLogged && job.dateLogged.includes('/')) {
+        // Try parsing DD/MM/YYYY manually
+        const parts = job.dateLogged.split('/');
+        if (parts.length === 3) {
+          jobDate = new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+      }
+    }
+    
+    if (isNaN(jobDate.getTime())) return true; // fallback if completely unparseable
+    
+    const now = new Date();
     
     if (filterMode === 'today') {
       return jobDate.toDateString() === now.toDateString();
